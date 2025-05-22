@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../../services/auth';
 import './Sidebar.css';
@@ -7,6 +7,18 @@ const Sidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
+  const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -34,51 +46,80 @@ const Sidebar = () => {
     }, 600);
   };
 
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
   return (
-    <div className="sidebar" ref={sidebarRef}>
-      <div className="sidebar-header">
-        <div className="logo-container">
-          <img 
-            src="/logo.png" 
-            alt="Money Matters Logo" 
-            className="logo-img" 
-          />
-        </div>
-      </div>
-      
-      <nav className="sidebar-nav">
-        <ul>
-          <li className={location.pathname === '/' ? 'active' : ''}>
-            <Link to="/" className="nav-link" onClick={createRipple}>
-              <div className="nav-icon dashboard-icon"></div>
-              <span className="nav-text">Dashboard</span>
-            </Link>
-          </li>
-          <li className={location.pathname === '/transactions' ? 'active' : ''}>
-            <Link to="/transactions" className="nav-link" onClick={createRipple}>
-              <div className="nav-icon transactions-icon"></div>
-              <span className="nav-text">Transactions</span>
-            </Link>
-          </li>
-          <li className={location.pathname === '/profile' ? 'active' : ''}>
-            <Link to="/profile" className="nav-link" onClick={createRipple}>
-              <div className="nav-icon profile-icon"></div>
-              <span className="nav-text">Profile</span>
-            </Link>
-          </li>
-        </ul>
-      </nav>
-      
-      <div className="sidebar-footer">
-        <button onClick={(e) => {
-          createRipple(e);
-          handleLogout();
-        }} className="logout-button">
-          <div className="logout-icon"></div>
-          <span>Logout</span>
+    <>
+      {isMobile && (
+        <button className="sidebar-toggle" onClick={toggleSidebar}>
+          <span className={`hamburger ${sidebarOpen ? 'open' : ''}`}></span>
         </button>
+      )}
+      
+      <div 
+        className={`sidebar ${sidebarOpen ? 'open' : ''}`} 
+        ref={sidebarRef}
+        onClick={() => isMobile && setSidebarOpen(false)}
+      >
+        <div className="sidebar-header">
+          <div className="logo-container">
+            <img 
+              src="/logo.png" 
+              alt="Money Matters Logo" 
+              className="logo-img" 
+            />
+          </div>
+          <div className="sidebar-header-decoration"></div>
+        </div>
+        
+        <nav className="sidebar-nav">
+          <div className="nav-decoration"></div>
+          <ul>
+            <li className={location.pathname === '/' ? 'active' : ''}>
+              <Link to="/" className="nav-link" onClick={createRipple}>
+                <div className="nav-icon dashboard-icon"></div>
+                <span className="nav-text">Dashboard</span>
+                <span className="nav-hover-effect"></span>
+              </Link>
+            </li>
+            <li className={location.pathname === '/transactions' ? 'active' : ''}>
+              <Link to="/transactions" className="nav-link" onClick={createRipple}>
+                <div className="nav-icon transactions-icon"></div>
+                <span className="nav-text">Transactions</span>
+                <span className="nav-hover-effect"></span>
+              </Link>
+            </li>
+            <li className={location.pathname === '/profile' ? 'active' : ''}>
+              <Link to="/profile" className="nav-link" onClick={createRipple}>
+                <div className="nav-icon profile-icon"></div>
+                <span className="nav-text">Profile</span>
+                <span className="nav-hover-effect"></span>
+              </Link>
+            </li>
+          </ul>
+        </nav>
+        
+        <div className="sidebar-footer">
+          <div className="footer-decoration"></div>
+          <button onClick={(e) => {
+            createRipple(e);
+            handleLogout();
+          }} className="logout-button">
+            <div className="logout-icon"></div>
+            <span>Logout</span>
+            <span className="logout-hover-effect"></span>
+          </button>
+        </div>
+        
+        <div className="sidebar-background"></div>
       </div>
-    </div>
+      
+      {isMobile && sidebarOpen && (
+        <div className="sidebar-overlay" onClick={toggleSidebar}></div>
+      )}
+    </>
   );
 };
 

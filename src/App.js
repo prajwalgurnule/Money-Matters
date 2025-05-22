@@ -23,9 +23,9 @@ const AppLayout = () => {
   const isLoginPage = location.pathname === '/login';
 
   return (
-    <div className="app">
+    <div className={`app ${isLoginPage ? 'login-layout' : ''}`}>
       {!isLoginPage && isAuthenticated() && <Sidebar />}
-      <main className={`main-content ${isLoginPage ? 'full-width' : ''}`}>
+      <main className={`main-content ${isLoginPage ? 'login-content' : ''}`}>
         <Routes>
           <Route path="/login" element={
             <PublicRoute>

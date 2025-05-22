@@ -1,8 +1,10 @@
+// Transactions.jsx
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import TransactionList from '../../components/TransactionList/TransactionList';
 import { Link } from 'react-router-dom';
 import { PAGE_SIZE } from '../../utils/constants';
+import { deleteTransaction as deleteTransactionApi } from '../../services/api'; // Import deleteTransaction API
 import './Transactions.css';
 
 const Transactions = () => {
@@ -10,7 +12,7 @@ const Transactions = () => {
     transactions, 
     loading, 
     error,
-    fetchData
+    fetchData // fetchData is crucial for refreshing after delete
   } = useAppContext();
   const [activeTab, setActiveTab] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,6 +34,18 @@ const Transactions = () => {
 
   const handleRefresh = () => {
     fetchData();
+  };
+
+  // Define the onDelete function to be passed to TransactionList
+  const handleDeleteTransaction = async (id) => {
+    try {
+      await deleteTransactionApi(id);
+      fetchData(); // Refresh data after successful deletion
+      alert('Transaction deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+      alert('Failed to delete transaction. Please try again.');
+    }
   };
 
   return (
@@ -56,17 +70,17 @@ const Transactions = () => {
           All Transactions
         </button>
         <button 
+          className={activeTab === 'debit' ? 'active' : ''}
+          onClick={() => setActiveTab('debit')}
+        >
+          Debit
+        </button>
+        <button 
           className={activeTab === 'credit' ? 'active' : ''}
           onClick={() => setActiveTab('credit')}
         >
           Credit
         </button>
-        <button 
-          className={activeTab === 'debit' ? 'active' : ''}
-          onClick={() => setActiveTab('debit')}
-        >
-          Debit
-        </button>    
       </div>
 
       {error ? (
@@ -77,6 +91,7 @@ const Transactions = () => {
             transactions={paginatedTransactions} 
             showCheckbox={false}
             loading={loading}
+            onDelete={handleDeleteTransaction}
           />
           
           {totalPages > 1 && (

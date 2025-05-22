@@ -34,7 +34,7 @@ const TransactionList = ({ transactions, loading, onDelete }) => {
             <th>Category</th>
             <th>Date</th>
             <th>Amount</th>
-            {/* <th>Actions</th> */}
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -47,7 +47,7 @@ const TransactionList = ({ transactions, loading, onDelete }) => {
                 {transaction.type === 'debit' ? '-' : '+'}
                 {formatCurrency(transaction.amount)}
               </td>
-              {/* <td className="actions">
+              <td className="actions">
                 <button 
                   onClick={(e) => handleEdit(transaction.id, e)}
                   className="edit-btn"
@@ -60,7 +60,7 @@ const TransactionList = ({ transactions, loading, onDelete }) => {
                 >
                   Delete
                 </button>
-              </td> */}
+              </td>
             </tr>
           ))}
         </tbody>

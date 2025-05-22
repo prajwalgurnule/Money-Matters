@@ -21,6 +21,16 @@ body {
   margin-bottom: 2rem;
 }
 
+.profile-header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--primary);
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .profile-title {
   font-size: 2.5rem;
   font-weight: 700;

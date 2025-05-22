@@ -15,7 +15,7 @@ const ProfilePage = () => {
     <div className="profile-container">
       <div className="profile-header">
         <h1 className="profile-title">Profile</h1>
-        <button className="add-transaction-btn">+ Add Transaction</button>
+        {/* <button className="add-transaction-btn">+ Add Transaction</button> */}
       </div>
 
       <div className="profile-card glass">
