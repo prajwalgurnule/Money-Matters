@@ -1,0 +1,446 @@
+/* :root {
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --primary-dark: #4338ca;
+  --secondary: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --light: #f8fafc;
+  --dark: #1e293b;
+  --gray: #64748b;
+  --gray-light: #e2e8f0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: var(--dark);
+  line-height: 1.5;
+}
+
+.app {
+  display: flex;
+  min-height: 100vh;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+  margin-left: 280px;
+  transition: margin 0.3s ease;
+}
+
+.main-content.full-width {
+  margin-left: 0;
+}
+
+
+button {
+  cursor: pointer;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.secondary-btn {
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+}
+
+.danger-btn {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+}
+
+.danger-btn:hover {
+  background-color: #dc2626;
+}
+
+.refresh-btn {
+  background-color: var(--gray-light);
+  color: var(--dark);
+}
+
+.refresh-btn:hover {
+  background-color: #cbd5e1;
+}
+
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+
+.chart-container {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.chart-container h2 {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--gray-light);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+
+.transaction-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.transaction-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: var(--gray-light);
+  color: var(--dark);
+  font-weight: 500;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.transaction-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.transaction-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-btn {
+  background-color: var(--info);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.delete-btn {
+  background-color: var(--danger);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 1rem;
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 100;
+    transition: transform 0.3s ease;
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+} */
+
+
+/* Global box-sizing reset for easier layout calculations */
+html {
+  box-sizing: border-box;
+}
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+:root {
+  --primary: #4f46e5;
+  --primary-light: #6366f1;
+  --primary-dark: #4338ca;
+  --secondary: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --light: #f8fafc;
+  --dark: #1e293b;
+  --gray: #64748b;
+  --gray-light: #e2e8f0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #f1f5f9;
+  color: var(--dark);
+  line-height: 1.5;
+  margin: 0; /* Ensure no default body margin */
+}
+
+.app {
+  display: flex; /* Use flexbox for the main app layout */
+  min-height: 100vh;
+  /* Prevent horizontal scrolling at the app level */
+  overflow-x: hidden; 
+}
+
+/* Assuming a sidebar component exists and has a defined width */
+/* Example: .sidebar { width: 280px; flex-shrink: 0; } */
+
+.main-content {
+  flex: 1; /* Allows main-content to grow and shrink, taking available space */
+  padding: 1rem;
+  /* Remove fixed margin-left, flexbox handles the spacing */
+  margin-left: 280px; 
+  transition: padding-left 0.3s ease; /* Transition padding if sidebar toggles */
+}
+
+/* This class would be applied to .main-content when the sidebar is hidden/collapsed */
+/* It would typically be paired with a change in sidebar's width or visibility */
+.main-content.full-width {
+  padding-left: 0; /* When sidebar is not present or collapsed, remove left padding */
+}
+
+/* Modern buttons */
+button {
+  cursor: pointer;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.primary-btn {
+  background-color: var(--primary);
+  color: white;
+  border: none;
+}
+
+.primary-btn:hover {
+  background-color: var(--primary-dark);
+}
+
+.secondary-btn {
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+}
+
+.danger-btn {
+  background-color: var(--danger);
+  color: white;
+  border: none;
+}
+
+.danger-btn:hover {
+  background-color: #dc2626;
+}
+
+.refresh-btn {
+  background-color: var(--gray-light);
+  color: var(--dark);
+}
+
+.refresh-btn:hover {
+  background-color: #cbd5e1;
+}
+
+/* Cards */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Charts */
+.charts-section { /* Added this for consistency with Dashboard.css */
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem; /* Ensure space below charts */
+}
+
+.chart-card {
+  flex: 1 1 calc(50% - 0.75rem); /* Allows two cards per row with gap */
+  min-width: 300px; /* Prevents cards from getting too small */
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.chart-card h2 {
+  font-size: 1.125rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  border: 1px solid var(--gray-light);
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+/* Tables */
+.transaction-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.transaction-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background-color: var(--gray-light);
+  color: var(--dark);
+  font-weight: 500;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.transaction-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--gray-light);
+}
+
+.transaction-table tr:hover td {
+  background-color: #f8fafc;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.edit-btn {
+  background-color: var(--info);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+.delete-btn {
+  background-color: var(--danger);
+  color: white;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.75rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .app {
+    flex-direction: column; /* Stack sidebar and main content vertically on small screens */
+  }
+
+  .main-content {
+    padding: 1rem; /* Adjust padding for smaller screens */
+    /* No left padding needed here as it's stacked */
+  }
+  
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 100;
+    transition: transform 0.3s ease;
+    width: 100%; /* Sidebar takes full width when stacked */
+    height: auto; /* Adjust height as needed */
+  }
+  
+  .sidebar.open {
+    transform: translateX(0);
+  }
+}

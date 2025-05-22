@@ -1,0 +1,63 @@
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.stat-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card h3 {
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.stat-card .amount {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.stat-card.credit .amount {
+  color: #2e7d32;
+}
+
+.stat-card.debit .amount {
+  color: #c62828;
+}
+
+.week-overview {
+  background-color: white;
+  border-radius: 8px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 2rem;
+}
+
+.week-overview h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.week-days {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+.day {
+  text-align: center;
+  padding: 0.5rem;
+  cursor: pointer;
+}
+
+.day.active {
+  background-color: #4a6bdf;
+  color: white;
+  border-radius: 4px;
+}
