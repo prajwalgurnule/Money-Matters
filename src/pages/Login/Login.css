@@ -138,7 +138,7 @@
 
 .input-with-icon svg {
   position: absolute;
-  left: 1rem;
+  left: 0rem;
   top: 50%;
   transform: translateY(-50%);
   color: var(--gray);

@@ -14,4 +14,4 @@ export const TRANSACTION_TYPES = {
   CREDIT: 'credit'
 };
 
-export const PAGE_SIZE = 5;
+export const PAGE_SIZE = 20;

@@ -3,14 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { addTransaction, updateTransaction } from '../../services/api';
 import './TransactionForm.css';
 
-const TransactionForm = ({ transaction, isEdit }) => {
+const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     transaction_name: transaction?.transaction_name || '',
     type: transaction?.type || 'debit',
     category: transaction?.category || '',
     amount: transaction?.amount || '',
-    date: transaction?.date || new Date().toISOString()
+    date: transaction?.date || new Date().toISOString().slice(0, 16)
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -37,7 +37,7 @@ const TransactionForm = ({ transaction, isEdit }) => {
       } else {
         await addTransaction(formData);
       }
-      navigate('/transactions');
+      if (onSuccess) onSuccess();
     } catch (err) {
       console.error('Error saving transaction:', err);
       setError('Failed to save transaction. Please try again.');
@@ -47,72 +47,128 @@ const TransactionForm = ({ transaction, isEdit }) => {
   };
 
   return (
-    <div className="transaction-form">
-      <h1>{isEdit ? 'Update Transaction' : 'Add Transaction'}</h1>
+    <div className="transaction-form-container">
+      <div className="form-header">
+        <h2>
+          <span className="form-icon">{isEdit ? '✏️' : '➕'}</span>
+          {isEdit ? 'Update Transaction' : 'Add New Transaction'}
+        </h2>
+        <p className="form-subtitle">Track your financial activity</p>
+      </div>
       
-      {error && <div className="error-message">{error}</div>}
-      
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label>Transaction Name</label>
-          <input
-            type="text"
-            name="transaction_name"
-            value={formData.transaction_name}
-            onChange={handleChange}
-            required
-          />
+      {error && (
+        <div className="error-message">
+          ⚠️ {error}
         </div>
-        
-        <div className="form-group">
-          <label>Transaction Type</label>
-          <select
-            name="type"
-            value={formData.type}
-            onChange={handleChange}
-            required
+      )}
+      
+      <form onSubmit={handleSubmit} className="transaction-form">
+        <div className="form-row">
+          <div className="form-group floating">
+            <input
+              type="text"
+              name="transaction_name"
+              id="transaction_name"
+              value={formData.transaction_name}
+              onChange={handleChange}
+              required
+              placeholder=" "
+            />
+            <label htmlFor="transaction_name">Transaction Name</label>
+            <span className="input-icon">🛒</span>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group floating select-wrapper">
+            <select
+              name="type"
+              id="type"
+              value={formData.type}
+              onChange={handleChange}
+              required
+            >
+              <option value="debit">Debit (Expense)</option>
+              <option value="credit">Credit (Income)</option>
+            </select>
+            <label htmlFor="type">Transaction Type</label>
+            <span className="input-icon">🔄</span>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group floating">
+            <input
+              type="text"
+              name="category"
+              id="category"
+              value={formData.category}
+              onChange={handleChange}
+              required
+              placeholder=" "
+            />
+            <label htmlFor="category">Category</label>
+            <span className="input-icon">🏷️</span>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group floating currency-input">
+            <input
+              type="number"
+              name="amount"
+              id="amount"
+              value={formData.amount}
+              onChange={handleChange}
+              required
+              placeholder=" "
+              step="0.01"
+              min="0"
+            />
+            <label htmlFor="amount">Amount</label>
+            <span className="currency-symbol">$</span>
+            <span className="input-icon">💰</span>
+          </div>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group floating">
+            <input
+              type="datetime-local"
+              name="date"
+              id="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="date">Date & Time</label>
+            <span className="input-icon">📅</span>
+          </div>
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            className="cancel-btn"
+            onClick={() => navigate('/transactions')}
+            disabled={loading}
           >
-            <option value="debit">Debit</option>
-            <option value="credit">Credit</option>
-          </select>
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="submit-btn"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="spinner"></span>
+            ) : isEdit ? (
+              'Update Transaction'
+            ) : (
+              'Add Transaction'
+            )}
+          </button>
         </div>
-        
-        <div className="form-group">
-          <label>Category</label>
-          <input
-            type="text"
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Amount</label>
-          <input
-            type="number"
-            name="amount"
-            value={formData.amount}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <div className="form-group">
-          <label>Date</label>
-          <input
-            type="datetime-local"
-            name="date"
-            value={formData.date.slice(0, 16)}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        
-        <button type="submit" disabled={loading}>
-          {loading ? 'Saving...' : isEdit ? 'Update Transaction' : 'Add Transaction'}
-        </button>
       </form>
     </div>
   );

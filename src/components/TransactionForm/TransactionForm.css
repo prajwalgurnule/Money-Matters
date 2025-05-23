@@ -1,46 +1,223 @@
-.transaction-form {
-  max-width: 600px;
+/* Main container */
+.transaction-form-container {
+  max-width: 500px;
   margin: 0 auto;
-  background-color: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
 }
 
-.transaction-form h1 {
-  margin-bottom: 1.5rem;
-  color: #2c3e50;
+/* Header styles */
+.form-header {
+  padding: 1.5rem 2rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
 }
 
+.form-header h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.form-icon {
+  font-size: 1.2em;
+}
+
+.form-subtitle {
+  margin: 0.25rem 0 0;
+  opacity: 0.9;
+  font-size: 0.9rem;
+}
+
+/* Form styles */
+.transaction-form {
+  padding: 1.5rem 2rem 2rem;
+}
+
+.form-row {
+  margin-bottom: 1.25rem;
+}
+
+/* Floating label form groups */
 .form-group {
-  margin-bottom: 1.5rem;
+  position: relative;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 0.5rem;
-  font-weight: 500;
-  color: #555;
-}
-
-.form-group input,
-.form-group select {
+.form-group.floating input,
+.form-group.floating select {
   width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  padding: 1rem 1rem 1rem 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
   font-size: 1rem;
+  background-color: #f9f9f9;
+  transition: all 0.3s ease;
 }
 
-.form-group input:focus,
-.form-group select:focus {
+.form-group.floating input:focus,
+.form-group.floating select:focus {
   outline: none;
-  border-color: #4a6bdf;
+  border-color: #667eea;
+  background-color: #fff;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
 }
 
-.transaction-form button {
-  width: 100%;
-  padding: 0.75rem;
+.form-group.floating label {
+  position: absolute;
+  top: 1rem;
+  left: 2.5rem;
+  color: #777;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+
+.form-group.floating input:focus + label,
+.form-group.floating input:not(:placeholder-shown) + label,
+.form-group.floating select:focus + label,
+.form-group.floating select:not(:placeholder-shown) + label {
+  top: -0.5rem;
+  left: 2rem;
+  font-size: 0.75rem;
+  background: white;
+  padding: 0 0.5rem;
+  color: #667eea;
+}
+
+.input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+}
+
+/* Special styles for select */
+.select-wrapper {
+  position: relative;
+}
+
+.select-wrapper::after {
+  content: "▼";
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+  pointer-events: none;
+}
+
+/* Currency input styles */
+.currency-symbol {
+  position: absolute;
+  left: 2.5rem;
+  top: 0.9rem;
+  color: #777;
+}
+
+.currency-input input {
+  padding-left: 3rem !important;
+}
+
+.currency-input label {
+  left: 3rem !important;
+}
+
+/* Date input styles */
+input[type="datetime-local"] {
+  padding-right: 1rem;
+}
+
+/* Error message */
+.error-message {
+  padding: 0.75rem 1rem;
+  margin: 0 2rem 1.5rem;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Form actions */
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.submit-btn {
+  flex: 1;
+  padding: 1rem;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
   font-size: 1rem;
-  margin-top: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.submit-btn:disabled {
+  background: #ddd;
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+.cancel-btn {
+  flex: 1;
+  padding: 1rem;
+  background: #f5f5f5;
+  color: #666;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.cancel-btn:hover {
+  background: #f09494;
+}
+
+/* Loading spinner */
+.spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .transaction-form-container {
+    border-radius: 0;
+    max-width: 100%;
+    min-height: 100vh;
+  }
+  
+  .form-header,
+  .transaction-form {
+    padding: 1.25rem;
+  }
 }
