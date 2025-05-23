@@ -7,7 +7,8 @@ import BarChart from '../../components/Charts/BarChart';
 import PieChart from '../../components/Charts/PieChart';
 import LineChart from '../../components/Charts/LineChart';
 import { formatCurrency } from '../../utils/formatters';
-import { deleteTransaction as deleteTransactionApi } from '../../services/api'; // Import deleteTransaction API function
+import { deleteTransaction as deleteTransactionApi } from '../../services/api';
+import { subDays, format, parseISO } from 'date-fns';
 import './Dashboard.css';
 
 const itemVariants = {
@@ -26,34 +27,70 @@ const itemVariants = {
 const Dashboard = () => {
   const {
     totals,
-    last7Days,
     transactions,
     loading,
     error,
-    fetchData // This function is crucial for refreshing data after a delete
+    fetchData
   } = useAppContext();
 
-  // Calculate weekly credit and debit totals
-  const weeklyCredit = last7Days
-    .filter(day => day.type === 'credit')
-    .reduce((sum, day) => sum + day.sum, 0);
+  // Function to group transactions by day and type for the last 7 days including today
+  const groupTransactionsByDay = (transactions) => {
+    const now = new Date();
+    const days = Array.from({ length: 7 }, (_, i) => subDays(now, i)).reverse();
+    
+    // Initialize dayMap with all 7 days
+    const dayMap = days.reduce((acc, day) => {
+      const dateKey = format(day, 'yyyy-MM-dd');
+      acc[dateKey] = {
+        date: dateKey,
+        credit: 0,
+        debit: 0
+      };
+      return acc;
+    }, {});
 
-  const weeklyDebit = last7Days
-    .filter(day => day.type === 'debit')
-    .reduce((sum, day) => sum + day.sum, 0);
+    // Process transactions
+    transactions.forEach(transaction => {
+      const transactionDate = parseISO(transaction.date);
+      const dateKey = format(transactionDate, 'yyyy-MM-dd');
+      
+      // Only consider transactions from the last 7 days
+      if (dayMap[dateKey]) {
+        if (transaction.type === 'credit') {
+          dayMap[dateKey].credit += transaction.amount;
+        } else {
+          dayMap[dateKey].debit += transaction.amount;
+        }
+      }
+    });
+
+    // Convert to array and format for charts
+    return Object.values(dayMap).map(day => ({
+      date: day.date,
+      credit: day.credit,
+      debit: day.debit
+    }));
+  };
+
+  // Prepare chart data using the grouped transactions
+  const chartData = groupTransactionsByDay(transactions);
+
+  // Calculate weekly totals
+  const weeklyCredit = chartData.reduce((sum, day) => sum + day.credit, 0);
+  const weeklyDebit = chartData.reduce((sum, day) => sum + day.debit, 0);
 
   // Prepare data for charts
   const barChartData = {
-    labels: last7Days.map(day => new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })),
+    labels: chartData.map(day => format(parseISO(day.date), 'EEE')), // Short day names
     datasets: [
       {
         label: 'Credit',
-        data: last7Days.filter(day => day.type === 'credit').map(day => day.sum),
+        data: chartData.map(day => day.credit),
         backgroundColor: '#4ade80',
       },
       {
         label: 'Debit',
-        data: last7Days.filter(day => day.type === 'debit').map(day => day.sum),
+        data: chartData.map(day => day.debit),
         backgroundColor: '#f87171',
       }
     ]
@@ -68,13 +105,12 @@ const Dashboard = () => {
     }]
   };
 
-  // Prepare data for Line Chart (e.g., daily balance trend)
   const lineChartData = {
-    labels: last7Days.map(day => new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })),
+    labels: chartData.map(day => format(parseISO(day.date), 'MMM dd')), // Month and day
     datasets: [
       {
         label: 'Daily Credit',
-        data: last7Days.filter(day => day.type === 'credit').map(day => day.sum),
+        data: chartData.map(day => day.credit),
         borderColor: '#22c55e',
         backgroundColor: 'rgba(34, 197, 94, 0.2)',
         tension: 0.4,
@@ -82,7 +118,7 @@ const Dashboard = () => {
       },
       {
         label: 'Daily Debit',
-        data: last7Days.filter(day => day.type === 'debit').map(day => day.sum),
+        data: chartData.map(day => day.debit),
         borderColor: '#ef4444',
         backgroundColor: 'rgba(239, 68, 68, 0.2)',
         tension: 0.4,
@@ -92,16 +128,13 @@ const Dashboard = () => {
   };
 
   const handleRefresh = () => {
-    fetchData(); // Calls the fetchData function from AppContext to refresh all data
+    fetchData();
   };
 
-  // Function to handle transaction deletion
   const handleDeleteTransaction = async (id) => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
-        // Call the deleteTransaction API function
         await deleteTransactionApi(id);
-        // After successful deletion, refresh all data in the context
         fetchData();
         alert('Transaction deleted successfully!');
       } catch (err) {
@@ -142,7 +175,8 @@ const Dashboard = () => {
           <StatsCards
             creditTotal={totals.credit}
             debitTotal={totals.debit}
-            last7Days={last7Days}
+            weeklyCredit={weeklyCredit}
+            weeklyDebit={weeklyDebit}
             loading={loading}
           />
 
@@ -150,7 +184,7 @@ const Dashboard = () => {
             <div className="chart-card large-chart-card">
               <h2>Debit & Credit Overview</h2>
               <BarChart data={barChartData} />
-             <div className="chart-summary">
+              <div className="chart-summary">
                 <div className="summary-item">
                   <span>Weekly Credit</span>
                   <span className="credit-value">{formatCurrency(weeklyCredit)}</span>
@@ -164,7 +198,7 @@ const Dashboard = () => {
             <div className="chart-card">
               <h2>Balance Distribution</h2>
               <PieChart data={pieChartData} />
-               <div className="chart-summary">
+              <div className="chart-summary">
                 <div className="summary-item">
                   <span>Credit</span>
                   <span className="credit-value">{Math.round((totals.credit / (totals.credit + totals.debit)) * 100)}%</span>
@@ -178,7 +212,7 @@ const Dashboard = () => {
             <div className="chart-card">
               <h2>Daily Trends</h2>
               <LineChart data={lineChartData} />
-               <div className="chart-summary">
+              <div className="chart-summary">
                 <div className="summary-item">
                   <span>Avg. Daily Credit</span>
                   <span className="credit-value">{formatCurrency(weeklyCredit / 7)}</span>
