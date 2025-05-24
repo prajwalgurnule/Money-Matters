@@ -1,9 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { logout } from '../../services/auth';
+import { useAppContext } from '../../context/AppContext';
+import { FiLogOut, FiUser, FiPieChart, FiDollarSign } from 'react-icons/fi';
 import './Sidebar.css';
 
 const Sidebar = () => {
+  const { profile } = useAppContext();
   const location = useLocation();
   const navigate = useNavigate();
   const sidebarRef = useRef(null);
@@ -50,6 +53,12 @@ const Sidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  const getInitials = (name) => {
+    if (!name) return 'U';
+    const names = name.split(' ');
+    return names.map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  };
+
   return (
     <>
       {isMobile && (
@@ -79,21 +88,21 @@ const Sidebar = () => {
           <ul>
             <li className={location.pathname === '/' ? 'active' : ''}>
               <Link to="/" className="nav-link" onClick={createRipple}>
-                <div className="nav-icon dashboard-icon"></div>
+                <FiPieChart className="nav-icon" />
                 <span className="nav-text">Dashboard</span>
                 <span className="nav-hover-effect"></span>
               </Link>
             </li>
             <li className={location.pathname === '/transactions' ? 'active' : ''}>
               <Link to="/transactions" className="nav-link" onClick={createRipple}>
-                <div className="nav-icon transactions-icon"></div>
+                <FiDollarSign className="nav-icon" />
                 <span className="nav-text">Transactions</span>
                 <span className="nav-hover-effect"></span>
               </Link>
             </li>
             <li className={location.pathname === '/profile' ? 'active' : ''}>
               <Link to="/profile" className="nav-link" onClick={createRipple}>
-                <div className="nav-icon profile-icon"></div>
+                <FiUser className="nav-icon" />
                 <span className="nav-text">Profile</span>
                 <span className="nav-hover-effect"></span>
               </Link>
@@ -103,14 +112,26 @@ const Sidebar = () => {
         
         <div className="sidebar-footer">
           <div className="footer-decoration"></div>
-          <button onClick={(e) => {
-            createRipple(e);
-            handleLogout();
-          }} className="logout-button">
-            <div className="logout-icon"></div>
-            <span>Logout</span>
-            <span className="logout-hover-effect"></span>
-          </button>
+          <div className="user-profile">
+            <div className="user-avatar">
+              {getInitials(profile?.name)}
+              <span className="online-dot"></span>
+            </div>
+            <div className="user-info">
+              <div className="user-name">{profile?.name || 'User'}</div>
+              <div className="user-email">{profile?.email || 'user@example.com'}</div>
+            </div>
+            <button 
+              onClick={(e) => {
+                createRipple(e);
+                handleLogout();
+              }} 
+              className="logout-button"
+              title="Sign Out"
+            >
+              <FiLogOut className="logout-icon" />
+            </button>
+          </div>
         </div>
         
         <div className="sidebar-background"></div>

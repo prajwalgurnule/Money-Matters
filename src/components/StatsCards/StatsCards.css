@@ -1,63 +1,148 @@
 .stats-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 1.5rem;
   margin-bottom: 2rem;
 }
 
 .stat-card {
   background-color: white;
-  border-radius: 8px;
+  border-radius: 16px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.stat-card h3 {
-  font-size: 1rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
 }
 
-.stat-card .amount {
-  font-size: 1.5rem;
-  font-weight: 600;
+.balance-card::after {
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
 }
 
-.stat-card.credit .amount {
-  color: #2e7d32;
+.credit-card::after {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
 }
 
-.stat-card.debit .amount {
-  color: #c62828;
+.debit-card::after {
+  background: linear-gradient(90deg, #ef4444 0%, #f87171 100%);
 }
 
-.week-overview {
-  background-color: white;
-  border-radius: 8px;
-  padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2rem;
-}
-
-.week-overview h2 {
-  font-size: 1.25rem;
+.stat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   margin-bottom: 1rem;
 }
 
-.week-days {
+.stat-header h3 {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #6b7280;
+}
+
+.trend-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+}
+
+.trend-indicator.positive {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.trend-indicator.negative {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.trend-indicator img {
+  width: 14px;
+  height: 14px;
+}
+
+.card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credit-card .card-icon {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.debit-card .card-icon {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+.card-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.amount {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
+}
+
+.balance-card .amount {
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.credit-card .amount {
+  color: #10b981;
+}
+
+.debit-card .amount {
+  color: #ef4444;
+}
+
+.stat-footer {
   display: flex;
   justify-content: space-between;
-  margin-top: 1rem;
+  align-items: center;
+  font-size: 0.875rem;
+  color: #6b7280;
+  padding-top: 0.5rem;
+  border-top: 1px dashed #e5e7eb;
 }
 
-.day {
-  text-align: center;
-  padding: 0.5rem;
-  cursor: pointer;
+.stat-footer span:last-child {
+  font-weight: 500;
 }
 
-.day.active {
-  background-color: #4a6bdf;
-  color: white;
-  border-radius: 4px;
+.positive {
+  color: #10b981;
+}
+
+.negative {
+  color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .stats-container {
+    grid-template-columns: 1fr;
+  }
 }

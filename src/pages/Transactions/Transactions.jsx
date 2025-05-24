@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import TransactionList from '../../components/TransactionList/TransactionList';
 import { Link } from 'react-router-dom';
+import { FiPlus } from 'react-icons/fi';
 import { PAGE_SIZE } from '../../utils/constants';
 import { deleteTransaction as deleteTransactionApi } from '../../services/api'; // Import deleteTransaction API
 import './Transactions.css';
@@ -57,6 +58,7 @@ const Transactions = () => {
             Refresh
           </button>
           <Link to="/add-transaction" className="add-button">
+            <FiPlus className="mr-2" />
             Add Transaction
           </Link>
         </div>
