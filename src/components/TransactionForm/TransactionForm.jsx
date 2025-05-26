@@ -29,15 +29,26 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
     setError(null);
 
     try {
+      let response;
       if (isEdit) {
-        await updateTransaction({
+        response = await updateTransaction({
           id: transaction.id,
           ...formData
         });
       } else {
-        await addTransaction(formData);
+        response = await addTransaction(formData);
       }
-      if (onSuccess) onSuccess();
+      
+      // Call onSuccess with the new/updated transaction
+      onSuccess({
+        id: response.id || transaction.id,
+        transaction_name: formData.transaction_name,
+        type: formData.type,
+        category: formData.category,
+        amount: formData.amount,
+        date: formData.date,
+        user_id: response.user_id
+      });
     } catch (err) {
       console.error('Error saving transaction:', err);
       setError('Failed to save transaction. Please try again.');

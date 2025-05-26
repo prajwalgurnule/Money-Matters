@@ -1,12 +1,15 @@
-import React, { useState} from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 import { formatCurrency } from '../../utils/formatters';
 import { TransactionListSkeleton } from '../SkeletonLoader/SkeletonLoader';
 import { CSVLink } from 'react-csv';
 import { format, parseISO } from 'date-fns';
+import { deleteTransaction } from '../../services/api';
 import './TransactionList.css';
 
-const TransactionList = ({ transactions, loading, onDelete }) => {
+const TransactionList = ({ transactions, loading }) => {
+  const { deleteTransactionFromState } = useAppContext();
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -81,7 +84,13 @@ const TransactionList = ({ transactions, loading, onDelete }) => {
   const handleDelete = async (id, e) => {
     e.stopPropagation();
     if (window.confirm('Are you sure you want to delete this transaction?')) {
-      await onDelete(id);
+      try {
+        await deleteTransaction(id);
+        deleteTransactionFromState(id);
+      } catch (err) {
+        console.error('Error deleting transaction:', err);
+        alert('Failed to delete transaction. Please try again.');
+      }
     }
   };
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { motion } from 'framer-motion';
 import StatsCards from '../../components/StatsCards/StatsCards';
@@ -30,102 +30,112 @@ const Dashboard = () => {
     transactions,
     loading,
     error,
-    fetchData
+    fetchData,
+    deleteTransactionFromState,
+    profile
   } = useAppContext();
 
-  // Function to group transactions by day and type for the last 7 days including today
-  const groupTransactionsByDay = (transactions) => {
-    const now = new Date();
-    const days = Array.from({ length: 7 }, (_, i) => subDays(now, i)).reverse();
-    
-    // Initialize dayMap with all 7 days
-    const dayMap = days.reduce((acc, day) => {
-      const dateKey = format(day, 'yyyy-MM-dd');
-      acc[dateKey] = {
-        date: dateKey,
-        credit: 0,
-        debit: 0
-      };
-      return acc;
-    }, {});
+  // Only fetch data if it's not already loaded
+  useEffect(() => {
+    if (!transactions.length && !loading) {
+      fetchData();
+    }
+  }, [transactions.length, loading, fetchData]);
 
-    // Process transactions
-    transactions.forEach(transaction => {
-      const transactionDate = parseISO(transaction.date);
-      const dateKey = format(transactionDate, 'yyyy-MM-dd');
+  // Memoized chart data calculations
+  const { weeklyCredit, weeklyDebit, barChartData, pieChartData, lineChartData } = React.useMemo(() => {
+    // Function to group transactions by day and type for the last 7 days including today
+    const groupTransactionsByDay = (transactions) => {
+      const now = new Date();
+      const days = Array.from({ length: 7 }, (_, i) => subDays(now, i)).reverse();
       
-      // Only consider transactions from the last 7 days
-      if (dayMap[dateKey]) {
-        if (transaction.type === 'credit') {
-          dayMap[dateKey].credit += transaction.amount;
-        } else {
-          dayMap[dateKey].debit += transaction.amount;
+      // Initialize dayMap with all 7 days
+      const dayMap = days.reduce((acc, day) => {
+        const dateKey = format(day, 'yyyy-MM-dd');
+        acc[dateKey] = {
+          date: dateKey,
+          credit: 0,
+          debit: 0
+        };
+        return acc;
+      }, {});
+
+      // Process transactions
+      transactions.forEach(transaction => {
+        const transactionDate = parseISO(transaction.date);
+        const dateKey = format(transactionDate, 'yyyy-MM-dd');
+        
+        // Only consider transactions from the last 7 days
+        if (dayMap[dateKey]) {
+          if (transaction.type === 'credit') {
+            dayMap[dateKey].credit += parseFloat(transaction.amount);
+          } else {
+            dayMap[dateKey].debit += parseFloat(transaction.amount);
+          }
         }
-      }
-    });
+      });
 
-    // Convert to array and format for charts
-    return Object.values(dayMap).map(day => ({
-      date: day.date,
-      credit: day.credit,
-      debit: day.debit
-    }));
-  };
+      // Convert to array and format for charts
+      return Object.values(dayMap).map(day => ({
+        date: day.date,
+        credit: day.credit,
+        debit: day.debit
+      }));
+    };
 
-  // Prepare chart data using the grouped transactions
-  const chartData = groupTransactionsByDay(transactions);
+    const chartData = groupTransactionsByDay(transactions);
+    const weeklyCredit = chartData.reduce((sum, day) => sum + day.credit, 0);
+    const weeklyDebit = chartData.reduce((sum, day) => sum + day.debit, 0);
 
-  // Calculate weekly totals
-  const weeklyCredit = chartData.reduce((sum, day) => sum + day.credit, 0);
-  const weeklyDebit = chartData.reduce((sum, day) => sum + day.debit, 0);
+    const barChartData = {
+      labels: chartData.map(day => format(parseISO(day.date), 'EEE')),
+      datasets: [
+        {
+          label: 'Credit',
+          data: chartData.map(day => day.credit),
+          backgroundColor: '#4ade80',
+        },
+        {
+          label: 'Debit',
+          data: chartData.map(day => day.debit),
+          backgroundColor: '#f87171',
+        }
+      ]
+    };
 
-  // Prepare data for charts
-  const barChartData = {
-    labels: chartData.map(day => format(parseISO(day.date), 'EEE')), // Short day names
-    datasets: [
-      {
-        label: 'Credit',
-        data: chartData.map(day => day.credit),
-        backgroundColor: '#4ade80',
-      },
-      {
-        label: 'Debit',
-        data: chartData.map(day => day.debit),
-        backgroundColor: '#f87171',
-      }
-    ]
-  };
+    const pieChartData = {
+      labels: ['Credit', 'Debit'],
+      datasets: [{
+        data: [totals.credit, totals.debit],
+        backgroundColor: ['#4ade80', '#f87171'],
+        hoverBackgroundColor: ['#22c55e', '#ef4444']
+      }]
+    };
 
-  const pieChartData = {
-    labels: ['Credit', 'Debit'],
-    datasets: [{
-      data: [totals.credit, totals.debit],
-      backgroundColor: ['#4ade80', '#f87171'],
-      hoverBackgroundColor: ['#22c55e', '#ef4444']
-    }]
-  };
+    const lineChartData = {
+      labels: chartData.map(day => format(parseISO(day.date), 'MMM dd')),
+      datasets: [
+        {
+          label: 'Daily Credit',
+          data: chartData.map(day => day.credit),
+          borderColor: '#22c55e',
+          backgroundColor: 'rgba(34, 197, 94, 0.2)',
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: 'Daily Debit',
+          data: chartData.map(day => day.debit),
+          borderColor: '#ef4444',
+          backgroundColor: 'rgba(239, 68, 68, 0.2)',
+          tension: 0.4,
+          fill: true,
+        }
+      ]
+    };
 
-  const lineChartData = {
-    labels: chartData.map(day => format(parseISO(day.date), 'MMM dd')), // Month and day
-    datasets: [
-      {
-        label: 'Daily Credit',
-        data: chartData.map(day => day.credit),
-        borderColor: '#22c55e',
-        backgroundColor: 'rgba(34, 197, 94, 0.2)',
-        tension: 0.4,
-        fill: true,
-      },
-      {
-        label: 'Daily Debit',
-        data: chartData.map(day => day.debit),
-        borderColor: '#ef4444',
-        backgroundColor: 'rgba(239, 68, 68, 0.2)',
-        tension: 0.4,
-        fill: true,
-      }
-    ]
-  };
+    return { chartData, weeklyCredit, weeklyDebit, barChartData, pieChartData, lineChartData };
+  }, [transactions, totals]);
 
   const handleRefresh = () => {
     fetchData();
@@ -135,7 +145,7 @@ const Dashboard = () => {
     if (window.confirm('Are you sure you want to delete this transaction?')) {
       try {
         await deleteTransactionApi(id);
-        fetchData();
+        deleteTransactionFromState(id);
         alert('Transaction deleted successfully!');
       } catch (err) {
         console.error('Error deleting transaction:', err);
@@ -144,10 +154,20 @@ const Dashboard = () => {
     }
   };
 
+  // Welcome message with user's name
+  const welcomeMessage = profile 
+    ? `Welcome back, ${profile.name || 'User'}!`
+    : 'Welcome to your dashboard';
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
-        <motion.h1 variants={itemVariants}>Dashboard</motion.h1>
+        <div>
+          <motion.h1 variants={itemVariants}>{welcomeMessage}</motion.h1>
+          <motion.p variants={itemVariants} className="dashboard-subtitle">
+            Here's your financial overview
+          </motion.p>
+        </div>
         <motion.button 
           onClick={handleRefresh} 
           disabled={loading} 

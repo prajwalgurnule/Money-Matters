@@ -1,7 +1,6 @@
-// AddEditTransaction.jsx
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAppContext } from '../../context/AppContext'; // Import useAppContext
+import { useAppContext } from '../../context/AppContext';
 import TransactionForm from '../../components/TransactionForm/TransactionForm';
 import { CATEGORIES } from '../../utils/constants';
 import './AddEditTransaction.css';
@@ -9,7 +8,12 @@ import './AddEditTransaction.css';
 const AddEditTransaction = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { transactions, loading, fetchData } = useAppContext(); // Destructure fetchData
+  const { 
+    transactions, 
+    loading, 
+    addTransactionToState,
+    updateTransactionInState
+  } = useAppContext();
 
   const isEdit = !!id;
   const transaction = isEdit
@@ -22,10 +26,13 @@ const AddEditTransaction = () => {
     return null;
   }
 
-  // Define the success handler for the form
-  const handleTransactionSuccess = () => {
-    fetchData(); // This will re-fetch all data, including totals and last 7 days
-    navigate('/transactions'); // Then navigate to the transactions page
+  const handleTransactionSuccess = (newTransaction) => {
+    if (isEdit) {
+      updateTransactionInState(newTransaction);
+    } else {
+      addTransactionToState(newTransaction);
+    }
+    navigate('/transactions');
   };
 
   return (
@@ -33,8 +40,8 @@ const AddEditTransaction = () => {
       <TransactionForm
         transaction={transaction}
         isEdit={isEdit}
-        categories={CATEGORIES} // Assuming you still use this for validation or dropdowns
-        onSuccess={handleTransactionSuccess} // Pass the success handler
+        categories={CATEGORIES}
+        onSuccess={handleTransactionSuccess}
       />
     </div>
   );

@@ -74,11 +74,12 @@ const Sidebar = () => {
       >
         <div className="sidebar-header">
           <div className="logo-container">
-            <img 
+           <Link to="/"><img 
               src="/logo.png" 
               alt="Money Matters Logo" 
               className="logo-img" 
             />
+            </Link> 
           </div>
           <div className="sidebar-header-decoration"></div>
         </div>
