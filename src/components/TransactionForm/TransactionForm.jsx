@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addTransaction, updateTransaction } from '../../services/api';
 import './TransactionForm.css';
@@ -8,30 +8,50 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
   
   // Helper function to format date for datetime-local input
   const formatDateForInput = (dateString) => {
-    if (!dateString) return new Date().toISOString().slice(0, 16);
+    if (!dateString) {
+      // For new transactions, use current date/time
+      const now = new Date();
+      // Convert to local datetime string in the correct format
+      const offset = now.getTimezoneOffset() * 60000; // offset in milliseconds
+      return new Date(now - offset).toISOString().slice(0, 16);
+    }
     
     const date = new Date(dateString);
-    // Handle cases where dateString might be in different formats
+    // Handle invalid dates
     if (isNaN(date.getTime())) {
-      return new Date().toISOString().slice(0, 16);
+      const now = new Date();
+      const offset = now.getTimezoneOffset() * 60000;
+      return new Date(now - offset).toISOString().slice(0, 16);
     }
     
     // Convert to local datetime string in the correct format
-    const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
-    const localISOTime = new Date(date - offset).toISOString().slice(0, 16);
-    return localISOTime;
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date - offset).toISOString().slice(0, 16);
   };
 
   const [formData, setFormData] = useState({
-    transaction_name: transaction?.transaction_name || '',
-    type: transaction?.type || 'debit',
-    category: transaction?.category || '',
-    amount: transaction?.amount || '',
-    date: formatDateForInput(transaction?.date)
+    transaction_name: '',
+    type: 'debit',
+    category: '',
+    amount: '',
+    date: formatDateForInput() // Initialize with current date/time
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  // Initialize form data when transaction prop changes (for edit mode)
+  useEffect(() => {
+    if (isEdit && transaction) {
+      setFormData({
+        transaction_name: transaction.transaction_name || '',
+        type: transaction.type || 'debit',
+        category: transaction.category || '',
+        amount: transaction.amount || '',
+        date: formatDateForInput(transaction.date)
+      });
+    }
+  }, [isEdit, transaction]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -160,19 +180,19 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
         </div>
 
         <div className="form-row">
-        <div className="form-group floating">
-          <input
-            type="datetime-local"
-            name="date"
-            id="date"
-            value={formData.date}
-            onChange={handleChange}
-            required
-          />
-          <label htmlFor="date">Date & Time</label>
-          <span className="input-icon">📅</span>
+          <div className="form-group floating">
+            <input
+              type="datetime-local"
+              name="date"
+              id="date"
+              value={formData.date}
+              onChange={handleChange}
+              required
+            />
+            <label htmlFor="date">Date & Time</label>
+            <span className="input-icon">📅</span>
+          </div>
         </div>
-      </div>
 
         <div className="form-actions">
           <button
