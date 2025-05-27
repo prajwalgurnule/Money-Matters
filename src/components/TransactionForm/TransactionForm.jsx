@@ -239,22 +239,50 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
     if (!dateString) {
       // For new transactions, use current date/time
       const now = new Date();
-      // Convert to local datetime string in the correct format
-      const offset = now.getTimezoneOffset() * 60000; // offset in milliseconds
-      return new Date(now - offset).toISOString().slice(0, 16);
+      // Convert to local datetime string without timezone adjustment
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
     
+    // If dateString is already in ISO format (from server)
+    if (dateString.includes('T')) {
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+    
+    // For existing transactions, parse the date string
     const date = new Date(dateString);
     // Handle invalid dates
     if (isNaN(date.getTime())) {
       const now = new Date();
-      const offset = now.getTimezoneOffset() * 60000;
-      return new Date(now - offset).toISOString().slice(0, 16);
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
     
-    // Convert to local datetime string in the correct format
-    const offset = date.getTimezoneOffset() * 60000;
-    return new Date(date - offset).toISOString().slice(0, 16);
+    // Convert to local datetime string
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
   };
 
   const [formData, setFormData] = useState({
@@ -303,24 +331,32 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
     setError(null);
 
     try {
+      // Create a proper Date object from the form data
+      const transactionDate = new Date(formData.date);
+      
+      // Prepare the data to send to the server
+      const transactionData = {
+        transaction_name: formData.transaction_name,
+        type: formData.type,
+        category: formData.category,
+        amount: formData.amount,
+        date: transactionDate.toISOString() // Store as ISO string
+      };
+
       let response;
       if (isEdit) {
         response = await updateTransaction({
           id: transaction.id,
-          ...formData
+          ...transactionData
         });
       } else {
-        response = await addTransaction(formData);
+        response = await addTransaction(transactionData);
       }
       
       // Call onSuccess with the updated/created transaction data
       onSuccess({
         id: response.id || transaction.id,
-        transaction_name: formData.transaction_name,
-        type: formData.type,
-        category: formData.category,
-        amount: formData.amount,
-        date: formData.date,
+        ...transactionData,
         user_id: response.user_id || transaction.user_id
       });
     } catch (err) {
