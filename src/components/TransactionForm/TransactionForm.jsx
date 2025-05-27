@@ -5,13 +5,31 @@ import './TransactionForm.css';
 
 const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
   const navigate = useNavigate();
+  
+  // Helper function to format date for datetime-local input
+  const formatDateForInput = (dateString) => {
+    if (!dateString) return new Date().toISOString().slice(0, 16);
+    
+    const date = new Date(dateString);
+    // Handle cases where dateString might be in different formats
+    if (isNaN(date.getTime())) {
+      return new Date().toISOString().slice(0, 16);
+    }
+    
+    // Convert to local datetime string in the correct format
+    const offset = date.getTimezoneOffset() * 60000; // offset in milliseconds
+    const localISOTime = new Date(date - offset).toISOString().slice(0, 16);
+    return localISOTime;
+  };
+
   const [formData, setFormData] = useState({
     transaction_name: transaction?.transaction_name || '',
     type: transaction?.type || 'debit',
     category: transaction?.category || '',
     amount: transaction?.amount || '',
-    date: transaction?.date || new Date().toISOString().slice(0, 16)
+    date: formatDateForInput(transaction?.date)
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -39,7 +57,6 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
         response = await addTransaction(formData);
       }
       
-      // Call onSuccess with the new/updated transaction
       onSuccess({
         id: response.id || transaction.id,
         transaction_name: formData.transaction_name,
@@ -143,19 +160,19 @@ const TransactionForm = ({ transaction, isEdit, onSuccess }) => {
         </div>
 
         <div className="form-row">
-          <div className="form-group floating">
-            <input
-              type="datetime-local"
-              name="date"
-              id="date"
-              value={formData.date}
-              onChange={handleChange}
-              required
-            />
-            <label htmlFor="date">Date & Time</label>
-            <span className="input-icon">📅</span>
-          </div>
+        <div className="form-group floating">
+          <input
+            type="datetime-local"
+            name="date"
+            id="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+          />
+          <label htmlFor="date">Date & Time</label>
+          <span className="input-icon">📅</span>
         </div>
+      </div>
 
         <div className="form-actions">
           <button
