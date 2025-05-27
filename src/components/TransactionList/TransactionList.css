@@ -13,6 +13,19 @@
   gap: 1rem;
 }
 
+.admin-notice {
+  background-color: #fff3cd; /* light yellow */
+  border: 1px solid #ffeeba; /* slightly darker yellow border */
+  color: #856404; /* dark gold text for contrast */
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  margin: 1rem 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+
 .search-box {
   position: relative;
   flex: 1;

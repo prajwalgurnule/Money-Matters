@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getAuthHeaders, getCurrentUser } from './auth'; // Import getCurrentUser
+import { getAuthHeaders, isAdmin, getCurrentUser } from './auth';
 
 const API_BASE_URL = 'https://bursting-gelding-24.hasura.app/api/rest';
 
@@ -7,11 +7,14 @@ const api = axios.create({
   baseURL: API_BASE_URL
 });
 
-const authRequest = async (method, url, data = null) => {
+const authRequest = async (method, url, data = null, customHeaders = {}) => {
   const config = {
     method,
     url,
-    headers: getAuthHeaders()
+    headers: {
+      ...getAuthHeaders(), // Get default headers
+      ...customHeaders     // Apply custom headers, overriding if necessary
+    }
   };
 
   if (method === 'get' && data) {
@@ -29,73 +32,98 @@ const authRequest = async (method, url, data = null) => {
   }
 };
 
-// Fetch all transactions for current user
+// Admin specific APIs
+export const getAdminCreditDebitTotals = async () => {
+  if (!isAdmin()) throw new Error('Admin access required');
+  const data = await authRequest('get', '/transaction-totals-admin');
+  return data.transaction_totals_admin;
+};
+
+export const getAdminLast7DaysTotals = async () => {
+  if (!isAdmin()) throw new Error('Admin access required');
+  const data = await authRequest('get', '/daywise-totals-last-7-days-admin');
+  return data.last_7_days_transactions_totals_admin;
+};
+
+// Regular user APIs
 export const getAllTransactions = async (limit = 10000, offset = 0) => {
   const data = await authRequest('get', '/all-transactions', { 
     limit, 
-    offset
-    // user_id is now handled by Hasura through the x-hasura-user-id header
+    offset,
+    order_by: { date: 'desc' }
   });
-  return data.transactions;
+  return data.transactions || [];
 };
 
-// Fetch credit and debit totals for current user
 export const getCreditDebitTotals = async () => {
+  if (isAdmin()) {
+    return getAdminCreditDebitTotals();
+  }
   const data = await authRequest('get', '/credit-debit-totals');
   return data.totals_credit_debit_transactions;
 };
 
-// Fetch daywise totals for the last 7 days for current user
 export const getLast7DaysTotals = async () => {
+  if (isAdmin()) {
+    return getAdminLast7DaysTotals();
+  }
   const data = await authRequest('get', '/daywise-totals-7-days');
   return data.last_7_days_transactions_credit_debit_totals;
 };
 
-// Add a new transaction for current user
 export const addTransaction = async (transaction) => {
-  const currentUser = getCurrentUser(); // Get current user details
-  if (!currentUser || !currentUser.id) {
-    throw new Error('User not authenticated. Please log in.');
-  }
+  if (isAdmin()) throw new Error('Admin cannot add transactions');
+  
+  const currentUser = getCurrentUser();
+  if (!currentUser?.id) throw new Error('User not authenticated');
 
-  const data = await authRequest('post', '/add-transaction', {
+  const payload = {
     name: transaction.transaction_name,
     type: transaction.type,
     category: transaction.category,
-    amount: transaction.amount,
+    amount: parseFloat(transaction.amount),
     date: transaction.date,
-    user_id: parseInt(currentUser.id) // Add user_id to the payload
-  });
-  return data.insert_transactions_one;
+    user_id: parseInt(currentUser.id)
+  };
+
+  const data = await authRequest('post', '/add-transaction', payload);
+  return {
+    id: data.insert_transactions_one.id,
+    ...payload
+  };
 };
 
-// Update an existing transaction
 export const updateTransaction = async (transaction) => {
-  const currentUser = getCurrentUser(); // Get current user details
-  if (!currentUser || !currentUser.id) {
-    throw new Error('User not authenticated. Please log in.');
-  }
+  if (isAdmin()) throw new Error('Admin cannot update transactions');
 
-  const data = await authRequest('post', '/update-transaction', {
+  const currentUser = getCurrentUser();
+  if (!currentUser?.id) throw new Error('User not authenticated');
+
+  const payload = {
     id: transaction.id,
     name: transaction.transaction_name,
     type: transaction.type,
     category: transaction.category,
-    amount: transaction.amount,
-    date: transaction.date,
-    // user_id: parseInt(currentUser.id) // Add user_id to the payload
-  });
-  return data.update_transactions_by_pk;
+    amount: parseFloat(transaction.amount),
+    date: transaction.date
+  };
+
+  const data = await authRequest('post', '/update-transaction', payload);
+  return {
+    ...payload,
+    ...data.update_transactions_by_pk
+  };
 };
 
-// Delete a transaction
 export const deleteTransaction = async (id) => {
-  const data = await authRequest('delete', '/delete-transaction', { id });
-  return data.delete_transactions_by_pk;
+  if (isAdmin()) throw new Error('Admin cannot delete transactions');
+  
+  await authRequest('delete', '/delete-transaction', { id });
+  return id;
 };
 
-// Fetch profile for current user
 export const getProfile = async () => {
-  const data = await authRequest('get', '/profile');
+  // Always fetch profile with 'user' role, regardless of logged-in role
+  const data = await authRequest('get', '/profile', null, { 'x-hasura-role': 'user' });
   return data.users[0];
 };
