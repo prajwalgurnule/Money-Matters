@@ -122,8 +122,16 @@ export const deleteTransaction = async (id) => {
   return id;
 };
 
-export const getProfile = async () => {
-  // Always fetch profile with 'user' role, regardless of logged-in role
-  const data = await authRequest('get', '/profile', null, { 'x-hasura-role': 'user' });
+// export const getProfile = async () => {
+//   // Always fetch profile with 'user' role, regardless of logged-in role
+//   const data = await authRequest('get', '/profile', null, { 'x-hasura-role': 'user' });
+//   return data.users[0];
+// };
+
+export const getProfile = async (userId) => {
+  const data = await authRequest('get', '/profile', null, { 
+    'x-hasura-role': 'user',
+    'x-hasura-user-id': userId 
+  });
   return data.users[0];
 };

@@ -136,6 +136,25 @@
   background-color: #f8f9fa;
 }
 
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.user-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: #6366f1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: bold;
+}
+
 .credit {
   color: #2e7d32;
   font-weight: 600;
